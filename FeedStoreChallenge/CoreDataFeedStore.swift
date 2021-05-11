@@ -50,7 +50,32 @@ public final class CoreDataFeedStore: FeedStore {
 
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		let context = self.context
-		context.perform {}
+		context.perform {
+			do {
+				try self.deleteCacheIfExists(on: context)
+
+				let coreDataFeedEntity = CoreDataFeed(context: context)
+				coreDataFeedEntity.timestamp = timestamp
+
+				let entities: [CoreDataFeedImage] = feed.map { item in
+					let entity = CoreDataFeedImage(context: context)
+					entity.url = item.url
+					entity.id = item.id
+					entity.location = item.location
+					entity.imageDescription = item.description
+					entity.coreDataFeed = coreDataFeedEntity
+					return entity
+				}
+
+				coreDataFeedEntity.coreDataFeedImages = NSOrderedSet(array: entities)
+
+				try context.save()
+				completion(nil)
+			} catch {
+				context.rollback()
+				completion(error)
+			}
+		}
 	}
 
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
