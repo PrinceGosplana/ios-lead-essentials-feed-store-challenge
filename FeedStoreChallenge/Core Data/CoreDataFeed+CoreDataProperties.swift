@@ -15,8 +15,41 @@ extension CoreDataFeed {
 		return NSFetchRequest<CoreDataFeed>(entityName: "CoreDataFeed")
 	}
 
-	@NSManaged public var timestamp: Date?
-	@NSManaged public var coreDataFeedImage: CoreDataFeedImage?
+	@NSManaged public var timestamp: Date
+	@NSManaged public var coreDataFeedImages: NSOrderedSet?
+}
+
+// MARK: Generated accessors for coreDataFeedImages
+extension CoreDataFeed {
+	@objc(insertObject:inCoreDataFeedImagesAtIndex:)
+	@NSManaged internal func insertIntoCoreDataFeedImages(_ value: CoreDataFeedImage, at idx: Int)
+
+	@objc(removeObjectFromCoreDataFeedImagesAtIndex:)
+	@NSManaged internal func removeFromCoreDataFeedImages(at idx: Int)
+
+	@objc(insertCoreDataFeedImages:atIndexes:)
+	@NSManaged internal func insertIntoCoreDataFeedImages(_ values: [CoreDataFeedImage], at indexes: NSIndexSet)
+
+	@objc(removeCoreDataFeedImagesAtIndexes:)
+	@NSManaged internal func removeFromCoreDataFeedImages(at indexes: NSIndexSet)
+
+	@objc(replaceObjectInCoreDataFeedImagesAtIndex:withObject:)
+	@NSManaged internal func replaceCoreDataFeedImages(at idx: Int, with value: CoreDataFeedImage)
+
+	@objc(replaceCoreDataFeedImagesAtIndexes:withCoreDataFeedImages:)
+	@NSManaged internal func replaceCoreDataFeedImages(at indexes: NSIndexSet, with values: [CoreDataFeedImage])
+
+	@objc(addCoreDataFeedImagesObject:)
+	@NSManaged internal func addToCoreDataFeedImages(_ value: CoreDataFeedImage)
+
+	@objc(removeCoreDataFeedImagesObject:)
+	@NSManaged internal func removeFromCoreDataFeedImages(_ value: CoreDataFeedImage)
+
+	@objc(addCoreDataFeedImages:)
+	@NSManaged internal func addToCoreDataFeedImages(_ values: NSOrderedSet)
+
+	@objc(removeCoreDataFeedImages:)
+	@NSManaged internal func removeFromCoreDataFeedImages(_ values: NSOrderedSet)
 }
 
 extension CoreDataFeed: Identifiable {}

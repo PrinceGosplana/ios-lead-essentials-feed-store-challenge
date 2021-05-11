@@ -15,9 +15,9 @@ extension CoreDataFeedImage {
 		return NSFetchRequest<CoreDataFeedImage>(entityName: "CoreDataFeedImage")
 	}
 
-	@NSManaged public var id: UUID?
+	@NSManaged public var id: UUID
 	@NSManaged public var imageDescription: String?
-	@NSManaged public var url: URL?
+	@NSManaged public var url: URL
 	@NSManaged public var location: String?
 	@NSManaged public var coreDataFeed: CoreDataFeed?
 }

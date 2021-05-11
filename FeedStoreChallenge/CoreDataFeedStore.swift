@@ -31,7 +31,20 @@ public final class CoreDataFeedStore: FeedStore {
 	public func retrieve(completion: @escaping RetrievalCompletion) {
 		let context = self.context
 		context.perform {
-			completion(.empty)
+			do {
+				let fetchedFeedRequest: NSFetchRequest<CoreDataFeed> = CoreDataFeed.fetchRequest()
+				let result = try context.fetch(fetchedFeedRequest)
+
+				guard let coreDataFeed = result.first,
+				      let coreDataFeedArray = (coreDataFeed.coreDataFeedImages?.array as? [CoreDataFeedImage]) else {
+					completion(.empty)
+					return
+				}
+
+				completion(.found(feed: coreDataFeedArray.toLocal(), timestamp: coreDataFeed.timestamp))
+			} catch {
+				completion(.failure(error))
+			}
 		}
 	}
 
@@ -42,5 +55,21 @@ public final class CoreDataFeedStore: FeedStore {
 
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 		fatalError("Must be implemented")
+	}
+
+	private func deleteCacheIfExists(on context: NSManagedObjectContext) throws {
+		let fetchedFeedRequest: NSFetchRequest<CoreDataFeed> = CoreDataFeed.fetchRequest()
+		let result = try context.fetch(fetchedFeedRequest)
+		result.forEach {
+			context.delete($0)
+		}
+	}
+}
+
+private extension Array where Element == CoreDataFeedImage {
+	func toLocal() -> [LocalFeedImage] {
+		return map {
+			return LocalFeedImage(id: $0.id, description: $0.imageDescription, location: $0.location, url: $0.url)
+		}
 	}
 }
