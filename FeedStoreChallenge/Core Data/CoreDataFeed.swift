@@ -21,7 +21,7 @@ extension CoreDataFeed {
 			.compactMap { $0 as? CoreDataFeedImage }
 			.map { $0.local }
 	}
-
+	
 	static func managedFeedSet(from localFeed: [LocalFeedImage], in context: NSManagedObjectContext) -> NSOrderedSet {
 		return NSOrderedSet(array: localFeed.map { feed in
 			let managed = CoreDataFeedImage(context: context)
@@ -40,7 +40,7 @@ extension CoreDataFeed {
 		request.returnsObjectsAsFaults = false
 		return try context.fetch(request).first
 	}
-
+	
 	static func newInstance(in context: NSManagedObjectContext) throws -> CoreDataFeed {
 		try fetch(in: context).map(context.delete)
 		return CoreDataFeed(context: context)
