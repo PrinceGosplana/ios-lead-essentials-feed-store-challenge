@@ -29,19 +29,13 @@ public final class CoreDataFeedStore: FeedStore {
 	}
 
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		let context = self.context
-		context.perform {
+		perform { context in
 			do {
-				let fetchedFeedRequest: NSFetchRequest<CoreDataFeed> = CoreDataFeed.fetchRequest()
-				let result = try context.fetch(fetchedFeedRequest)
-
-				guard let coreDataFeed = result.first,
-				      let coreDataFeedArray = (coreDataFeed.coreDataFeedImages?.array as? [CoreDataFeedImage]) else {
+				if let coreDataFeed = try CoreDataFeed.fetch(in: context) {
+					completion(.found(feed: coreDataFeed.localFeed, timestamp: coreDataFeed.timestamp))
+				} else {
 					completion(.empty)
-					return
 				}
-
-				completion(.found(feed: coreDataFeedArray.toLocal(), timestamp: coreDataFeed.timestamp))
 			} catch {
 				completion(.failure(error))
 			}
@@ -49,25 +43,14 @@ public final class CoreDataFeedStore: FeedStore {
 	}
 
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-		let context = self.context
-		context.perform {
+		perform { context in
 			do {
-				try self.deleteCacheIfExists(on: context)
+				let newCache = try CoreDataFeed.newInstance(in: context)
 
-				let coreDataFeedEntity = CoreDataFeed(context: context)
-				coreDataFeedEntity.timestamp = timestamp
+				let value = CoreDataFeed.managedFeedSet(from: feed, in: context)
 
-				let entities: [CoreDataFeedImage] = feed.map { item in
-					let entity = CoreDataFeedImage(context: context)
-					entity.url = item.url
-					entity.id = item.id
-					entity.location = item.location
-					entity.imageDescription = item.description
-					entity.coreDataFeed = coreDataFeedEntity
-					return entity
-				}
-
-				coreDataFeedEntity.coreDataFeedImages = NSOrderedSet(array: entities)
+				newCache.coreDataFeedImages = value
+				newCache.timestamp = timestamp
 
 				try context.save()
 				completion(nil)
@@ -82,19 +65,8 @@ public final class CoreDataFeedStore: FeedStore {
 		fatalError("Must be implemented")
 	}
 
-	private func deleteCacheIfExists(on context: NSManagedObjectContext) throws {
-		let fetchedFeedRequest: NSFetchRequest<CoreDataFeed> = CoreDataFeed.fetchRequest()
-		let result = try context.fetch(fetchedFeedRequest)
-		result.forEach {
-			context.delete($0)
-		}
-	}
-}
-
-private extension Array where Element == CoreDataFeedImage {
-	func toLocal() -> [LocalFeedImage] {
-		return map {
-			return LocalFeedImage(id: $0.id, description: $0.imageDescription, location: $0.location, url: $0.url)
-		}
+	private func perform(_ action: @escaping (NSManagedObjectContext) -> Void) {
+		let context = self.context
+		context.perform { action(context) }
 	}
 }
