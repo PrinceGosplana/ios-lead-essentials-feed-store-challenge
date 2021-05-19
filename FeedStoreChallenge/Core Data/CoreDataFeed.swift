@@ -22,7 +22,7 @@ extension CoreDataFeed {
 			.map { $0.local }
 	}
 
-	static func managedFeedSet(from localFeed: [LocalFeedImage], in context: NSManagedObjectContext) -> NSOrderedSet {
+	static func images(from localFeed: [LocalFeedImage], in context: NSManagedObjectContext) -> NSOrderedSet {
 		return NSOrderedSet(array: localFeed.map { feed in
 			let managed = CoreDataFeedImage(context: context)
 			managed.id = feed.id
