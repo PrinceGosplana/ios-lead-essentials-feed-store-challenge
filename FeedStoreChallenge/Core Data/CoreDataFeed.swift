@@ -41,7 +41,7 @@ extension CoreDataFeed {
 		return try context.fetch(request).first
 	}
 
-	static func newInstance(in context: NSManagedObjectContext) throws -> CoreDataFeed {
+	static func uniqueInstance(in context: NSManagedObjectContext) throws -> CoreDataFeed {
 		try fetch(in: context).map(context.delete)
 		return CoreDataFeed(context: context)
 	}
